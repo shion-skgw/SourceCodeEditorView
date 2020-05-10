@@ -36,7 +36,6 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 	private var lineHeight: CGFloat
 	private var lineNumberAttribute: [NSAttributedString.Key: Any]
 	private var invisiblesAttribute: [NSAttributedString.Key: Any]
-	private var lineHighlightColor: UIColor
 
 	private var lastParaLocation: Int
 	private var lastParaNumber: Int
@@ -51,7 +50,7 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 	// MARK: - Initialize
 
 	override init() {
-		self.highlightLine = true
+		self.highlightLine = false
 		self.showInvisibles = true
 		self.selectedRange = NSRange()
 		self.textAreaWidth = 100.0
@@ -60,7 +59,6 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 		self.lineHeight = UIFont.systemFont(ofSize: UIFont.systemFontSize).lineHeight
 		self.lineNumberAttribute = [NSAttributedString.Key: Any]()
 		self.invisiblesAttribute = [NSAttributedString.Key: Any]()
-		self.lineHighlightColor = UIColor.lightGray
 		self.lastParaLocation = 0
 		self.lastParaNumber = 0
 		super.init()
@@ -117,8 +115,7 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 	// MARK: - Draw background
 
 	override func drawBackground(forGlyphRange glyphsToShow: NSRange, at origin: CGPoint) {
-		guard let textStorage = textStorage as? TextStorage,
-				let cgContext = UIGraphicsGetCurrentContext() else {
+		guard let textStorage = textStorage as? TextStorage else {
 			fatalError()
 		}
 
@@ -129,10 +126,6 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 
 			let charRange = self.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
 			let paraRange = (textStorage.string as NSString).paragraphRange(for: charRange)
-
-			if self.highlightLine && NSLocationInRange(self.selectedRange.location, paraRange) {
-				self.drawSelectedLine(rect: usedRect, cgContext: cgContext)
-			}
 
 			if charRange.location == paraRange.location {
 				let paragraphNumber = self.paragraphNumber(range: charRange, text: textStorage.string as NSString)
@@ -188,17 +181,6 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 		lineNumber.draw(in: rect, withAttributes: lineNumberAttribute)
 	}
 
-	private func drawSelectedLine(rect: CGRect, cgContext: CGContext) {
-		// text
-		let x = gutterWidth + 2.0
-		let y = rect.origin.y + verticalMargin - 0.5
-		let width = textAreaWidth - 4.0
-		let height = rect.size.height + 1
-		let rect = CGRect(x: x, y: y, width: width, height: height)
-		cgContext.setFillColor(lineHighlightColor.cgColor)
-		cgContext.fill(rect)
-	}
-
 	private func drawInvisibleCharacters(range: NSRange, textStorage: TextStorage) {
 		invisibles.forEach() {
 			(invisible) in
@@ -233,9 +215,6 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 	}
 
 	func set(backgroundColor: UIColor) {
-		// Set selected line color
-		self.lineHighlightColor = backgroundColor.brightness(0.7)
-
 		// Set invisibles font color
 		self.invisiblesAttribute[.foregroundColor] = backgroundColor.brightness(0.6)
 

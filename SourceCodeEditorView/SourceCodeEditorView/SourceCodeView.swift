@@ -15,6 +15,7 @@ final class SourceCodeView: UITextView {
 
 	private var gutterColor: CGColor!
 	private var gutterEdgeColor: CGColor!
+	private var lineHighlightColor: CGColor!
 
 	private let _textContainer: NSTextContainer
 	private let _layoutManager: LayoutManager
@@ -86,6 +87,16 @@ final class SourceCodeView: UITextView {
 		let gutterEdgeRect = CGRect(x: gutterWidth, y: bounds.origin.y - 0.5, width: 0.5, height: height)
 		context.fill(gutterEdgeRect)
 
+		// Draw select line
+		let a = self._layoutManager.boundingRect(forGlyphRange: (self._textStorage.string as NSString).lineRange(for: selectedRange), in: _textContainer)
+		let x: CGFloat = gutterWidth + 2.0
+		let y: CGFloat = verticalMargin + a.origin.y - 1.0
+		let width = _textContainer.size.width - 4.0
+		let _height = (a.origin.x == 0.0 ? font!.lineHeight : a.height) + 2.0
+		let re = CGRect(x: x, y: y, width: width, height: _height)
+		context.setFillColor(lineHighlightColor)
+		context.fill(re)
+
 		super.draw(rect)
 	}
 
@@ -94,6 +105,16 @@ final class SourceCodeView: UITextView {
 			self._layoutManager.selectedRange = selectedRange
 			self.setNeedsDisplay()
 		}
+	}
+
+	override func insertText(_ text: String) {
+		self.setNeedsDisplay()
+		super.insertText(text)
+	}
+
+	override func deleteBackward() {
+		self.setNeedsDisplay()
+		super.deleteBackward()
 	}
 
 	func set(font: UIFont, fontColor: UIColor) {
@@ -105,6 +126,7 @@ final class SourceCodeView: UITextView {
 
 	func set(backgroundColor: UIColor) {
 		self.backgroundColor = backgroundColor
+		self.lineHighlightColor = backgroundColor.brightness(0.7).cgColor
 		self.gutterColor = backgroundColor.brightness(0.9).cgColor
 		self.gutterEdgeColor = backgroundColor.brightness(0.7).cgColor
 		self._layoutManager.set(backgroundColor: backgroundColor)
