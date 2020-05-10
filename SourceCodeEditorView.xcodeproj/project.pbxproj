@@ -14,6 +14,10 @@
 		05AD3D4E246606D000A45587 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 05AD3D4D246606D000A45587 /* Assets.xcassets */; };
 		05AD3D51246606D000A45587 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 05AD3D4F246606D000A45587 /* LaunchScreen.storyboard */; };
 		05AD3D5C246606D000A45587 /* SourceCodeEditorViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D5B246606D000A45587 /* SourceCodeEditorViewTests.swift */; };
+		05AD3D682466071100A45587 /* TextStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D672466071100A45587 /* TextStorage.swift */; };
+		05AD3D6A2466077500A45587 /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D692466077500A45587 /* Token.swift */; };
+		05AD3D6C24660C7F00A45587 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D6B24660C7F00A45587 /* LayoutManager.swift */; };
+		05AD3D6E2467541E00A45587 /* SourceCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D6D2467541E00A45587 /* SourceCodeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +42,10 @@
 		05AD3D57246606D000A45587 /* SourceCodeEditorViewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SourceCodeEditorViewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		05AD3D5B246606D000A45587 /* SourceCodeEditorViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeEditorViewTests.swift; sourceTree = "<group>"; };
 		05AD3D5D246606D000A45587 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		05AD3D672466071100A45587 /* TextStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextStorage.swift; sourceTree = "<group>"; };
+		05AD3D692466077500A45587 /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
+		05AD3D6B24660C7F00A45587 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
+		05AD3D6D2467541E00A45587 /* SourceCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +87,7 @@
 		05AD3D43246606C900A45587 /* SourceCodeEditorView */ = {
 			isa = PBXGroup;
 			children = (
+				05AD3D66246606DF00A45587 /* SourceCodeEditorView */,
 				05AD3D44246606C900A45587 /* AppDelegate.swift */,
 				05AD3D46246606C900A45587 /* SceneDelegate.swift */,
 				05AD3D48246606C900A45587 /* ViewController.swift */,
@@ -97,6 +106,17 @@
 				05AD3D5D246606D000A45587 /* Info.plist */,
 			);
 			path = SourceCodeEditorViewTests;
+			sourceTree = "<group>";
+		};
+		05AD3D66246606DF00A45587 /* SourceCodeEditorView */ = {
+			isa = PBXGroup;
+			children = (
+				05AD3D6B24660C7F00A45587 /* LayoutManager.swift */,
+				05AD3D6D2467541E00A45587 /* SourceCodeView.swift */,
+				05AD3D672466071100A45587 /* TextStorage.swift */,
+				05AD3D692466077500A45587 /* Token.swift */,
+			);
+			path = SourceCodeEditorView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -201,8 +221,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				05AD3D49246606C900A45587 /* ViewController.swift in Sources */,
+				05AD3D6A2466077500A45587 /* Token.swift in Sources */,
 				05AD3D45246606C900A45587 /* AppDelegate.swift in Sources */,
+				05AD3D682466071100A45587 /* TextStorage.swift in Sources */,
+				05AD3D6E2467541E00A45587 /* SourceCodeView.swift in Sources */,
 				05AD3D47246606C900A45587 /* SceneDelegate.swift in Sources */,
+				05AD3D6C24660C7F00A45587 /* LayoutManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
