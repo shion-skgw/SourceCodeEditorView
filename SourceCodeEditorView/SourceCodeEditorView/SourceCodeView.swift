@@ -72,8 +72,10 @@ final class SourceCodeView: UITextView {
 		let fontColor = UIColor.black
 		let backgroundColor = UIColor(hue: 0, saturation: 0, brightness: 0.9, alpha: 1)
 		let tokens = [
+			Token(name: "return", type: .keyword, pattern: "return"),
 			Token(name: "func", type: .keyword, pattern: "func"),
-			Token(name: "NSString", type: .function, pattern: "NSString"),
+			Token(name: "String", type: .function, pattern: "String"),
+			Token(name: "comment", type: .comment, pattern: "//.*"),
 			Token(name: "comment", type: .comment, pattern: "/\\*[\\s\\S]*?\\*/", isMultipleLines: true),
 		]
 		set(font: font, fontColor: fontColor)
@@ -172,11 +174,11 @@ extension SourceCodeView {
 
 	private func drawLineNumber() {
 		enumerateLine() {
-			[unowned self] (lineNum, usedRect, stop) in
+			[unowned self] (lineNum, usedRect, _) in
 			let number = "\(lineNum)"
 			let size = number.size(withAttributes: self.lineNumberAttribute)
 			let x = self.gutterWidth - size.width - 4.0
-			let y = self.verticalMargin + usedRect.origin.y + (self.lineHeight - size.height) / 2.0
+			let y = self.verticalMargin + usedRect.origin.y + (self.lineHeight / 2.0 - size.height / 2.0)
 			let rect = CGRect(x: x, y: y, width: size.width, height: size.height)
 			number.draw(in: rect, withAttributes: self.lineNumberAttribute)
 		}
@@ -199,13 +201,11 @@ extension SourceCodeView {
 		var currentRange = text.lineRange(for: NSMakeRange(0, 0))
 		var stop = false
 
-		while true {
+		while !stop {
 			let index = NSMaxRange(currentRange)
 			var usedRect = boundingRect(forGlyphRange: currentRange)
 			block(lineNumber, usedRect, &stop)
-			if stop {
-				return
-			} else if text.length == 0 {
+			if text.length == 0 {
 				return
 			} else if text.length == index {
 				if text.substring(with: NSMakeRange(index - 1, 1)) == "\n" {
