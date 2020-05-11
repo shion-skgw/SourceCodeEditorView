@@ -24,178 +24,66 @@ extension UIColor {
 
 }
 
-final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
+private let INVISIBLES: [String: NSRegularExpression] = [
+	"\u{21B5}": try! NSRegularExpression(pattern: "[\r\n]", options: []),
+	"\u{226B}": try! NSRegularExpression(pattern: "\t", options: []),
+	"\u{22C5}": try! NSRegularExpression(pattern: "\u{0020}", options: []),
+	"\u{25A1}": try! NSRegularExpression(pattern: "\u{3000}", options: []),
+]
 
-	var highlightLine: Bool
+final class LayoutManager: NSLayoutManager {
+
 	var showInvisibles: Bool
-	var selectedRange: NSRange
 
-	private var textAreaWidth: CGFloat
 	private var gutterWidth: CGFloat
 	private var verticalMargin: CGFloat
 	private var lineHeight: CGFloat
-	private var lineNumberAttribute: [NSAttributedString.Key: Any]
 	private var invisiblesAttribute: [NSAttributedString.Key: Any]
-
-	private var lastParaLocation: Int
-	private var lastParaNumber: Int
-
-	private let invisibles: [String: NSRegularExpression] = [
-		"\u{21B5}": try! NSRegularExpression(pattern: "[\r\n]", options: []),
-		"\u{226B}": try! NSRegularExpression(pattern: "\t", options: []),
-		"\u{22C5}": try! NSRegularExpression(pattern: "\u{0020}", options: []),
-		"\u{25A1}": try! NSRegularExpression(pattern: "\u{3000}", options: []),
-	]
 
 	// MARK: - Initialize
 
 	override init() {
-		self.highlightLine = false
 		self.showInvisibles = true
-		self.selectedRange = NSRange()
-		self.textAreaWidth = 100.0
 		self.gutterWidth = 40.0
 		self.verticalMargin = 4.0
-		self.lineHeight = UIFont.systemFont(ofSize: UIFont.systemFontSize).lineHeight
-		self.lineNumberAttribute = [NSAttributedString.Key: Any]()
+		self.lineHeight = UIFont.systemFont.lineHeight
 		self.invisiblesAttribute = [NSAttributedString.Key: Any]()
-		self.lastParaLocation = 0
-		self.lastParaNumber = 0
 		super.init()
-		self.delegate = self
 	}
 
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
 
-	// MARK: - Override
-
-	override func processEditing(for textStorage: NSTextStorage,
-			edited editMask: NSTextStorage.EditActions,
-			range newCharRange: NSRange,
-			changeInLength delta: Int,
-			invalidatedRange invalidatedCharRange: NSRange) {
-		super.processEditing(
-			for: textStorage, edited:editMask, range: newCharRange, changeInLength: delta, invalidatedRange: invalidatedCharRange)
-		if invalidatedCharRange.location < lastParaLocation {
-			lastParaLocation = 0
-			lastParaNumber = 0
-		}
-	}
-
-	override func setLineFragmentRect(_ fragmentRect: CGRect, forGlyphRange glyphRange: NSRange, usedRect: CGRect) {
-		var fragmentRect = fragmentRect
-		fragmentRect.size.height = self.lineHeight
-		var usedRect = usedRect
-		usedRect.size.height = self.lineHeight
-		super.setLineFragmentRect(fragmentRect, forGlyphRange: glyphRange, usedRect: usedRect)
-	}
-
-	override func setExtraLineFragmentRect(_ fragmentRect: CGRect, usedRect: CGRect, textContainer container: NSTextContainer) {
-		var fragmentRect = fragmentRect
-		fragmentRect.size.height = self.lineHeight
-		var usedRect = usedRect
-		usedRect.size.height = self.lineHeight
-		super.setExtraLineFragmentRect(fragmentRect, usedRect: usedRect, textContainer: container)
-	}
-
-	// MARK: - Delegate
-
-	func layoutManager(_ layoutManager: NSLayoutManager,
-			shouldSetLineFragmentRect lineFragmentRect: UnsafeMutablePointer<CGRect>,
-			lineFragmentUsedRect: UnsafeMutablePointer<CGRect>,
-			baselineOffset: UnsafeMutablePointer<CGFloat>,
-			in textContainer: NSTextContainer,
-			forGlyphRange glyphRange: NSRange) -> Bool {
-		baselineOffset.pointee = lineHeight * 0.808
-		return true
-	}
-
 	// MARK: - Draw background
 
 	override func drawBackground(forGlyphRange glyphsToShow: NSRange, at origin: CGPoint) {
-		guard let textStorage = textStorage as? TextStorage else {
-			fatalError()
-		}
-
 		super.drawBackground(forGlyphRange: glyphsToShow, at: origin)
-
-		enumerateLineFragments(forGlyphRange: glyphsToShow) {
-			[unowned self, unowned textStorage] (_, usedRect, textContainer, glyphRange, _) in
-
-			let charRange = self.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
-			let paraRange = (textStorage.string as NSString).paragraphRange(for: charRange)
-
-			if charRange.location == paraRange.location {
-				let paragraphNumber = self.paragraphNumber(range: charRange, text: textStorage.string as NSString)
-				self.drawLineNumber(origin: usedRect.origin, lineNumber: paragraphNumber + 1)
-			}
-		}
-
 		if showInvisibles {
-			drawInvisibleCharacters(range: glyphsToShow, textStorage: textStorage)
+			drawInvisibleCharacters(range: glyphsToShow)
 		}
 	}
 
-	private func paragraphNumber(range: NSRange, text: NSString) -> Int {
-		if range.location == lastParaLocation {
-			return lastParaNumber
-
-		} else if range.location < lastParaLocation {
-			let target = NSRange(location: range.location, length: lastParaLocation - range.location)
-			var paraNumber = lastParaNumber
-			text.enumerateSubstrings(in: target, options: [.byParagraphs, .substringNotRequired, .reverse]) {
-				(_, _, enclosingRange, stop) in
-				if enclosingRange.location <= range.location {
-					stop.pointee = true
-				}
-				paraNumber -= 1
-			}
-			lastParaLocation = range.location
-			lastParaNumber = paraNumber
-			return paraNumber
-
-		} else {
-			let target = NSRange(location: lastParaLocation, length: range.location - lastParaLocation)
-			var paraNumber = lastParaNumber
-			text.enumerateSubstrings(in: target, options: [.byParagraphs, .substringNotRequired]) {
-				(_, _, enclosingRange, stop) in
-				if enclosingRange.location >= range.location {
-					stop.pointee = true
-				}
-				paraNumber += 1
-			}
-			lastParaLocation = range.location
-			lastParaNumber = paraNumber
-			return paraNumber
+	private func drawInvisibleCharacters(range: NSRange) {
+		guard let text = textStorage?.string else {
+			return
 		}
-	}
 
-	private func drawLineNumber(origin: CGPoint, lineNumber: Int) {
-		let lineNumber = "\(lineNumber)"
-		let size = lineNumber.size(withAttributes: lineNumberAttribute)
-		let x = gutterWidth - size.width - 4.0
-		let y = (lineHeight - size.height) / 2.0 + origin.y + verticalMargin
-		let rect = CGRect(x: x, y: y, width: size.width, height: size.height)
-		lineNumber.draw(in: rect, withAttributes: lineNumberAttribute)
-	}
+		for invisible in INVISIBLES {
+			let charSize = invisible.key.size(withAttributes: invisiblesAttribute)
 
-	private func drawInvisibleCharacters(range: NSRange, textStorage: TextStorage) {
-		invisibles.forEach() {
-			(invisible) in
-			invisible.value.enumerateMatches(in: textStorage.string, options: [], range: range) {
-				[unowned self] (result, _, _) in
+			invisible.value.enumerateMatches(in: text, options: [], range: range) {
+				[unowned self, invisible, charSize] (result, _, _) in
 				guard let range = result?.range else {
 					return
 				}
+
 				let index = NSMaxRange(range) - 1
-				var glyphPoint = self.location(forGlyphAt: index)
-				let glyphRect = self.lineFragmentRect(forGlyphAt: index, effectiveRange: nil)
-				glyphPoint.x += glyphRect.origin.x + self.gutterWidth
-//				glyphPoint.y = glyphRect.origin.y + (self.lineHeight * 0.797872340425532 / 2.0)
-				glyphPoint.y = glyphRect.origin.y + (self.lineHeight * 0.404 / 2.0)
-				invisible.key.draw(at: glyphPoint, withAttributes: self.invisiblesAttribute)
+				let rect = lineFragmentRect(forGlyphAt: index, effectiveRange: nil)
+				var point = location(forGlyphAt: index)
+				point.x += rect.origin.x + self.gutterWidth
+				point.y = rect.origin.y + self.verticalMargin + (self.lineHeight / 2.0 - charSize.height / 2.0)
+				invisible.key.draw(at: point, withAttributes: self.invisiblesAttribute)
 			}
 		}
 	}
@@ -203,32 +91,17 @@ final class LayoutManager: NSLayoutManager, NSLayoutManagerDelegate {
 	// MARK: - Setter
 
 	func set(font: UIFont) {
-		// Set line height
 		self.lineHeight = font.lineHeight
-
-		// Set invisibles font
 		self.invisiblesAttribute[.font] = font
-
-		// Set line number font
-		let lineNumberSize = CGFloat(floor(font.pointSize * 0.9))
-		self.lineNumberAttribute[.font] = font.withSize(lineNumberSize)
 	}
 
 	func set(backgroundColor: UIColor) {
-		// Set invisibles font color
-		self.invisiblesAttribute[.foregroundColor] = backgroundColor.brightness(0.6)
-
-		// Set line number color
-		self.lineNumberAttribute[.foregroundColor] = backgroundColor.brightness(0.4)
+		self.invisiblesAttribute[.foregroundColor] = backgroundColor.brightness(0.5)
 	}
 
 	func set(gutterWidth: CGFloat, verticalMargin: CGFloat) {
 		self.gutterWidth = gutterWidth
 		self.verticalMargin = verticalMargin
-	}
-
-	func set(textAreaWidth: CGFloat) {
-		self.textAreaWidth = textAreaWidth
 	}
 
 }

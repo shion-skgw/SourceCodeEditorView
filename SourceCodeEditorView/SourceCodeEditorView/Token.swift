@@ -12,11 +12,13 @@ struct Token {
 	let name: String
 	let type: TokenType
 	let regex: NSRegularExpression
+	let isMultipleLines: Bool
 
-	init(name: String, type: TokenType, pattern: String) {
+	init(name: String, type: TokenType, pattern: String, isMultipleLines: Bool = false) {
 		self.name = name
 		self.type = type
 		self.regex = try! NSRegularExpression(pattern: pattern)
+		self.isMultipleLines = isMultipleLines
 	}
 }
 
@@ -30,9 +32,9 @@ enum TokenType {
 		case .keyword:
 			return UIColor.purple
 		case .comment:
-			return UIColor.green
+			return UIColor.green.brightness(0.5)
 		case .function:
-			return UIColor.blue
+			return UIColor.blue.brightness(0.7)
 		}
 	}
 }

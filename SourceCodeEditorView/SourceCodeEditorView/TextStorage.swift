@@ -8,9 +8,9 @@
 
 import UIKit.NSTextStorage
 
-extension String {
-	var nsRange: NSRange {
-		return NSRange(self.startIndex..<self.endIndex, in: self)
+extension UIFont {
+	static var systemFont: UIFont {
+		return UIFont.systemFont(ofSize: UIFont.systemFontSize)
 	}
 }
 
@@ -46,14 +46,14 @@ final class TextStorage: NSTextStorage {
 	override func replaceCharacters(in range: NSRange, with str: String) {
 		beginEditing()
 		attributedString.replaceCharacters(in: range, with: str)
-		edited([.editedCharacters, .editedAttributes], range: range, changeInLength: str.count - range.length) // changeInLength ?
+		edited([.editedCharacters, .editedAttributes], range: range, changeInLength: str.count - range.length)
 		endEditing()
 	}
 
 	override func setAttributes(_ attrs: [NSAttributedString.Key : Any]?, range: NSRange) {
 		beginEditing()
 		attributedString.setAttributes(attrs, range: range)
-		edited(.editedAttributes, range: range, changeInLength: 0) // changeInLength ?
+		edited(.editedAttributes, range: range, changeInLength: 0)
 		endEditing()
 	}
 
@@ -61,34 +61,21 @@ final class TextStorage: NSTextStorage {
 		let lineRange = (string as NSString).lineRange(for: editedRange)
 		setAttributes(normalTextAttribute, range: lineRange)
 		applyTokenStyle(range: lineRange)
-		applyMultiLinesStyle()
 		super.processEditing()
 	}
 
 	// MARK: - Syntax highlight
 
 	private func applyTokenStyle(range: NSRange) {
-		for token in tokens {
-			token.regex.enumerateMatches(in: string, options: [], range: range) {
-				(result, _, _) in
-				guard let range = result?.range else {
-					return
-				}
-				var attribute = normalTextAttribute
-				attribute[.foregroundColor] = token.type.color
-				addAttributes(attribute, range: range)
-			}
-		}
-	}
+		let fullRange = NSMakeRange(0, string.count)
 
-	private func applyMultiLinesStyle() {
 		for token in tokens {
-			token.regex.enumerateMatches(in: string, options: [], range: string.nsRange) {
-				(result, _, _) in
+			token.regex.enumerateMatches(in: string, options: [], range: token.isMultipleLines ? fullRange : range) {
+				[unowned self, token] (result, _, _) in
 				guard let range = result?.range else {
 					return
 				}
-				var attribute = normalTextAttribute
+				var attribute = self.normalTextAttribute
 				attribute[.foregroundColor] = token.type.color
 				addAttributes(attribute, range: range)
 			}
@@ -98,21 +85,21 @@ final class TextStorage: NSTextStorage {
 	// MARK: - Setter
 
 	func set(font: UIFont, color: UIColor) {
-		normalTextAttribute[.font] = font
-		normalTextAttribute[.foregroundColor] = color
+		self.normalTextAttribute[.font] = font
+		self.normalTextAttribute[.foregroundColor] = color
 		update()
 	}
 
 	func set(tabWidth: Int) {
-		let paragraphStyle = NSMutableParagraphStyle()
+		let paragraphStyle = normalTextAttribute[.paragraphStyle] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
 		paragraphStyle.tabStops?.removeAll()
-		let font = normalTextAttribute[.font] as? UIFont ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)
+		let font = normalTextAttribute[.font] as? UIFont ?? UIFont.systemFont
 		let baseTabWidth = " ".size(withAttributes: [ .font: font ]).width * CGFloat(tabWidth)
 		for i in 1...50 {
 			let textTab = NSTextTab(textAlignment: .left, location: baseTabWidth * CGFloat(i))
 			paragraphStyle.addTabStop(textTab)
 		}
-		normalTextAttribute[.paragraphStyle] = paragraphStyle
+		self.normalTextAttribute[.paragraphStyle] = paragraphStyle
 		update()
 	}
 
@@ -122,9 +109,9 @@ final class TextStorage: NSTextStorage {
 	}
 
 	private func update() {
-		setAttributes(normalTextAttribute, range: string.nsRange)
-		applyTokenStyle(range: string.nsRange)
-		applyMultiLinesStyle()
+		let fullRange = NSMakeRange(0, string.count)
+		setAttributes(normalTextAttribute, range: fullRange)
+		applyTokenStyle(range: fullRange)
 	}
 
 }
