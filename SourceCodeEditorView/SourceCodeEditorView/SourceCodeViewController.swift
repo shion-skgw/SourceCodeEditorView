@@ -71,11 +71,8 @@ final class SourceCodeViewController: UIViewController {
         sourceCodeView.textContainerInset.left = gutterWidth
 
         // SourceCodeView param
-        sourceCodeView.lineHeight = font.lineHeight
-        sourceCodeView.gutterWidth = gutterWidth
         sourceCodeView.gutterColor = gutterColor.cgColor
         sourceCodeView.gutterEdgeColor = gutterEdgeColor.cgColor
-        sourceCodeView.verticalMargin = verticalMargin
         sourceCodeView.lineHighlight = true
         sourceCodeView.lineHighlightColor = lineHighlightColor.cgColor
         sourceCodeView.lineNumberAttribute = [

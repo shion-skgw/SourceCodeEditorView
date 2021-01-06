@@ -10,13 +10,8 @@ import UIKit
 
 final class SourceCodeView: UITextView {
 
-    var lineHeight: CGFloat = .zero
-
-    var gutterWidth: CGFloat = .zero
     var gutterColor: CGColor = UIColor.white.cgColor
     var gutterEdgeColor: CGColor = UIColor.white.cgColor
-    var verticalMargin: CGFloat = .zero
-
     var lineHighlight: Bool = false
     var lineHighlightColor: CGColor = UIColor.white.cgColor
     var lineNumberAttribute: [NSAttributedString.Key: Any] = [:]
@@ -68,11 +63,11 @@ extension SourceCodeView {
     private func drawGutter(_ cgContext: CGContext) {
         let height = max(bounds.height, contentSize.height)
 
-        let gutterRect = CGRect(x: bounds.origin.x, y: bounds.origin.y, width: gutterWidth, height: height)
+        let gutterRect = CGRect(x: bounds.origin.x, y: bounds.origin.y, width: textContainerInset.left, height: height)
         cgContext.setFillColor(gutterColor)
         cgContext.fill(gutterRect)
 
-        let gutterEdgeRect = CGRect(x: gutterWidth, y: bounds.origin.y - 0.5, width: 0.5, height: height)
+        let gutterEdgeRect = CGRect(x: textContainerInset.left, y: bounds.origin.y - 0.5, width: 0.5, height: height)
         cgContext.setFillColor(gutterEdgeColor)
         cgContext.fill(gutterEdgeRect)
     }
@@ -103,16 +98,16 @@ extension SourceCodeView {
     private func drawLineNumber(_ lineNumber: Int, _ usedRect: CGRect) {
         let number = NSAttributedString(string: "\(lineNumber)", attributes: lineNumberAttribute)
         let size = number.size()
-        let x = gutterWidth - size.width - 4.0
-        let y = verticalMargin + usedRect.origin.y + (lineHeight - size.height) / 2.0
+        let x = textContainerInset.left - size.width - 4.0
+        let y = textContainerInset.top + usedRect.origin.y + (font!.lineHeight - size.height) / 2.0
         number.draw(at: CGPoint(x: x, y: y))
     }
 
     private func drawLineHighlight(_ cgContext: CGContext) {
         let lineRange = (text as NSString).lineRange(for: selectedRange)
         var lineRect = boundingRect(lineRange)
-        lineRect.origin.x = gutterWidth + 2.0
-        lineRect.origin.y += verticalMargin - 1.0
+        lineRect.origin.x = textContainerInset.left + 2.0
+        lineRect.origin.y += textContainerInset.top - 1.0
         lineRect.size.width = textContainer.size.width - 4.0
         lineRect.size.height += 2.0
         cgContext.setFillColor(lineHighlightColor)
@@ -125,7 +120,7 @@ extension SourceCodeView {
         // X, height adjustment of line break-only lines.
         rect.origin.x = textContainer.lineFragmentPadding
         if rect.size.width == textContainer.size.width - textContainer.lineFragmentPadding {
-            rect.size.height -= lineHeight
+            rect.size.height -= font!.lineHeight
         }
         return rect
     }
