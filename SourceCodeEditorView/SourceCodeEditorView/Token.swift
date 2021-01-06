@@ -9,33 +9,31 @@
 import UIKit
 
 struct Token {
-	let name: String
-	let type: TokenType
-	let regex: NSRegularExpression
-	let isMultipleLines: Bool
+    let regex: NSRegularExpression
+    let isMultipleLines: Bool
+    let textAttribute: [NSAttributedString.Key: Any]
 
-	init(name: String, type: TokenType, pattern: String, isMultipleLines: Bool = false) {
-		self.name = name
-		self.type = type
-		self.regex = try! NSRegularExpression(pattern: pattern)
-		self.isMultipleLines = isMultipleLines
-	}
+    init(type: TokenType, pattern: String, isMultipleLines: Bool = false) {
+        self.regex = try! NSRegularExpression(pattern: pattern)
+        self.isMultipleLines = isMultipleLines
+        self.textAttribute = [.foregroundColor: type.color]
+    }
 }
 
 enum TokenType {
-	case keyword
-	case comment
-	case function
+    case keyword
+    case comment
+    case function
 
-	var color: UIColor {
-		switch self {
-		case .keyword:
-			return UIColor.purple
-		case .comment:
-			return UIColor.green.brightness(0.5)
-		case .function:
-			return UIColor.blue.brightness(0.7)
-		}
-	}
+    var color: UIColor {
+        switch self {
+        case .keyword:
+            return UIColor(red: 0.7, green: 0.0, blue: 0.0, alpha: 1.0)
+        case .comment:
+            return UIColor(red: 0.0, green: 0.5, blue: 0.0, alpha: 1.0)
+        case .function:
+            return UIColor(red: 0.0, green: 0.0, blue: 0.8, alpha: 1.0)
+        }
+    }
 }
 

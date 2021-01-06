@@ -10,11 +10,20 @@ import UIKit
 
 class ViewController: UIViewController {
 
-	override func viewDidLoad() {
-		super.viewDidLoad()
-		// Do any additional setup after loading the view.
-	}
+    private(set) weak var sourceCodeViewController: SourceCodeViewController!
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        let sourceCodeViewController = SourceCodeViewController()
+        addChild(sourceCodeViewController)
+        view.addSubview(sourceCodeViewController.view)
+        sourceCodeViewController.didMove(toParent: self)
+        self.sourceCodeViewController = sourceCodeViewController
+    }
+
+    override func viewDidLayoutSubviews() {
+        sourceCodeViewController.view.frame = view.safeAreaLayoutGuide.layoutFrame
+    }
 
 }
-

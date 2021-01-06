@@ -18,6 +18,7 @@
 		05AD3D6A2466077500A45587 /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D692466077500A45587 /* Token.swift */; };
 		05AD3D6C24660C7F00A45587 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D6B24660C7F00A45587 /* LayoutManager.swift */; };
 		05AD3D6E2467541E00A45587 /* SourceCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD3D6D2467541E00A45587 /* SourceCodeView.swift */; };
+		05F6E79225A525BE00385AAC /* SourceCodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F6E79125A525BE00385AAC /* SourceCodeViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		05AD3D692466077500A45587 /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
 		05AD3D6B24660C7F00A45587 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
 		05AD3D6D2467541E00A45587 /* SourceCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeView.swift; sourceTree = "<group>"; };
+		05F6E79125A525BE00385AAC /* SourceCodeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceCodeViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +117,7 @@
 				05AD3D6D2467541E00A45587 /* SourceCodeView.swift */,
 				05AD3D672466071100A45587 /* TextStorage.swift */,
 				05AD3D692466077500A45587 /* Token.swift */,
+				05F6E79125A525BE00385AAC /* SourceCodeViewController.swift */,
 			);
 			path = SourceCodeEditorView;
 			sourceTree = "<group>";
@@ -224,6 +227,7 @@
 				05AD3D6A2466077500A45587 /* Token.swift in Sources */,
 				05AD3D45246606C900A45587 /* AppDelegate.swift in Sources */,
 				05AD3D682466071100A45587 /* TextStorage.swift in Sources */,
+				05F6E79225A525BE00385AAC /* SourceCodeViewController.swift in Sources */,
 				05AD3D6E2467541E00A45587 /* SourceCodeView.swift in Sources */,
 				05AD3D47246606C900A45587 /* SceneDelegate.swift in Sources */,
 				05AD3D6C24660C7F00A45587 /* LayoutManager.swift in Sources */,
