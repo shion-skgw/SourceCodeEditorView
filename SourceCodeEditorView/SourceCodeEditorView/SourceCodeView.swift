@@ -77,7 +77,7 @@ extension SourceCodeView {
 
         var lineNumber = 1
         var currentLineRange = nsString.lineRange(for: NSMakeRange(0, 0))
-        var currentLineRect = boundingRect(currentLineRange)
+        var currentLineRect = layoutManager.boundingRect(forGlyphRange: currentLineRange, in: textContainer)
 
         while true {
             drawLineNumber(lineNumber, currentLineRect)
@@ -86,7 +86,7 @@ extension SourceCodeView {
             }
             lineNumber += 1
             currentLineRange = nsString.lineRange(for: NSMakeRange(currentLineRange.upperBound, 0))
-            currentLineRect = boundingRect(currentLineRange)
+            currentLineRect = layoutManager.boundingRect(forGlyphRange: currentLineRange, in: textContainer)
         }
 
         if text.hasSuffix("\n") {
@@ -105,24 +105,13 @@ extension SourceCodeView {
 
     private func drawLineHighlight(_ cgContext: CGContext) {
         let lineRange = (text as NSString).lineRange(for: selectedRange)
-        var lineRect = boundingRect(lineRange)
+        var lineRect = layoutManager.boundingRect(forGlyphRange: lineRange, in: textContainer)
         lineRect.origin.x = textContainerInset.left + 2.0
         lineRect.origin.y += textContainerInset.top - 1.0
         lineRect.size.width = textContainer.size.width - 4.0
         lineRect.size.height += 2.0
         cgContext.setFillColor(lineHighlightColor)
         cgContext.fill(lineRect)
-    }
-
-    private func boundingRect(_ range: NSRange) -> CGRect {
-        var rect = layoutManager.boundingRect(forGlyphRange: range, in: textContainer)
-
-        // X, height adjustment of line break-only lines.
-        rect.origin.x = textContainer.lineFragmentPadding
-        if rect.size.width == textContainer.size.width - textContainer.lineFragmentPadding {
-            rect.size.height -= font!.lineHeight
-        }
-        return rect
     }
 
 }

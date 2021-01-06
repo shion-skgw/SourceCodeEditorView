@@ -59,4 +59,15 @@ final class LayoutManager: NSLayoutManager {
         }
     }
 
+    override func boundingRect(forGlyphRange glyphRange: NSRange, in container: NSTextContainer) -> CGRect {
+        var rect = super.boundingRect(forGlyphRange: glyphRange, in: container)
+
+        // X, height adjustment of line break-only lines.
+        rect.origin.x = container.lineFragmentPadding
+        if rect.size.width == container.size.width - container.lineFragmentPadding {
+            rect.size.height -= lineHeight
+        }
+        return rect
+    }
+
 }
